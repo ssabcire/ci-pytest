@@ -1,10 +1,10 @@
 version: 2.0
 jobs: # 1回の実行の基本作業単位
   build: # Workflows を使用しない実行では、エントリポイントとして `build` ジョブが必要
-    docker: # Docker でステップを実行
+    docker: # Dockerでステップを実行
       - image: circleci/python:3.6.3
     steps:
-      - checkout # ソースコードをチェックアウト
+      - checkout # プロジェクトのソースコードをworking_directoryで指定されたパスにチェックアウト
       - run:
           name: install dependencies
           command: | # 仮想環境作成, 仮想環境をアクティベート, pip install
@@ -15,4 +15,5 @@ jobs: # 1回の実行の基本作業単位
       - run:
           name: run test
           command: |
+            source .venv/bin/activate
             pytest tests
