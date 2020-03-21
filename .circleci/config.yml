@@ -5,15 +5,33 @@ jobs: # 1回の実行の基本作業単位
       - image: circleci/python:3.6.3
     steps:
       - checkout # プロジェクトのソースコードをworking_directoryで指定されたパスにチェックアウト
+      - restore_cache:
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
           name: install dependencies
           command: | # 仮想環境作成, 仮想環境をアクティベート, pip install
             python3 -m venv .venv
             source .venv/bin/activate
             pip install -r requirements.txt
+      - save-cache: # 仮想環境とインストールされたパッケージをキャッシュする
+          key: deps9-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ".venv" # キャッシュ先のPATH
 
       - run:
           name: run test
           command: |
             source .venv/bin/activate
             pytest tests
+
+      - store_test_results: # テスト結果をCircleCIにアップロード
+          path: test-results
+          # restore-cache:
+          #   keys:
+          #     - source-v1-{{ .Branch }}-{{ .Revision }} # gitのリビジョンからキャッシュを探す
+          #     - source-v1-{{ .Branch }}- # 現在のブランチを探す
+          #     - source-v1- # 全体から探す
+          # save-cache:
+          #   key: source-v1-{{ .Branch }}-{{ .Revision }}
+          #   paths:
+          #     - ".git" # gitレポジトリのキャッシュ
